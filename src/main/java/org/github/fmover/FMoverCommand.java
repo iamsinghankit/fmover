@@ -62,7 +62,7 @@ public class FMoverCommand implements Callable<Integer> {
         }
 
         Set<Map.Entry<Object, Object>> entries = config.get().entrySet();
-        List<DirFileMapping> mappings = new ArrayList<>();
+        List<DirFileMapping> mappings = new ArrayList<>(entries.size());
         for (Map.Entry<Object, Object> entry : entries) {
             var mapping = new DirFileMapping(getBaseDir(entry.getKey().toString()), List.of(entry.getValue().toString().split(",")));
             mappings.add(mapping);
