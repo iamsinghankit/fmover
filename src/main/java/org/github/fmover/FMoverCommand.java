@@ -1,6 +1,7 @@
 package org.github.fmover;
 
 import org.github.fmover.service.*;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
@@ -32,6 +33,12 @@ public class FMoverCommand implements Callable<Integer> {
             paramLabel = "<dest-dir>")
     private Path desDir;
 
+    @Option(names = {"--co", "--copy-option"},
+            description = "Action to take if conflict occurs while moving files - possible values: REPLACE,RENAME,FAIL",
+            defaultValue = "RENAME",
+            showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
+    private FMoverService.CopyOption copyOption;
+
 
     @Option(names = {"-c", "--config"},
             description = "Config file location.",
@@ -46,7 +53,7 @@ public class FMoverCommand implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         Logger.setDebug(debug);
-        var listener = new FMoverService(destDirMapping());
+        var listener = new FMoverService(destDirMapping(), copyOption);
         var watchDir = new WatchDir(srcDir, listener, true);
         watchDir.processEvents();
         return 0;
