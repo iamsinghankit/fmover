@@ -53,7 +53,7 @@ public class FMoverCommand implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         Logger.setDebug(debug);
-        var listener = new FMoverService(destDirMapping(), copyOption);
+        var listener = new DefaultFMoverService(destDirMapping(), copyOption);
         var watchDir = new WatchDir(srcDir, listener, true);
         watchDir.processEvents();
         return 0;
