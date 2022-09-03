@@ -8,11 +8,10 @@ import picocli.CommandLine.Parameters;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
+
+import static org.github.fmover.service.FMoverService.getExt;
 
 /**
  * @author iamsinghankit
@@ -53,36 +52,62 @@ public class FMoverCommand implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         Logger.setDebug(debug);
-        var listener = new DefaultFMoverService(destDirMapping(), copyOption);
-        var watchDir = new WatchDir(srcDir, listener, true);
+        var watchDirListener = new WatchDirFileMover(new DefaultFMoverService(copyOption));
+        var watchDir = new WatchDir(srcDir, watchDirListener, true);
         watchDir.processEvents();
         return 0;
     }
 
 
-    private List<DirFileMapping> destDirMapping() throws Exception {
-        Config config = null;
-        if (configPath == null) {
-            config = new Config();
-        } else {
-            config = new Config(configPath.toFile().getAbsolutePath());
+    private class WatchDirFileMover implements WatchDir.WatchDirListener {
+
+        private final FMoverService fMoverService;
+        private final List<DirFileMapping> dirFileMappings;
+
+        private WatchDirFileMover(FMoverService fMoverService) throws Exception {
+            this.fMoverService = fMoverService;
+            this.dirFileMappings = destDirMapping();
         }
 
-        Set<Map.Entry<Object, Object>> entries = config.get().entrySet();
-        List<DirFileMapping> mappings = new ArrayList<>(entries.size());
-        for (Map.Entry<Object, Object> entry : entries) {
-            var mapping = new DirFileMapping(getBaseDir(entry.getKey().toString()), List.of(entry.getValue().toString().split(",")));
-            mappings.add(mapping);
+        private List<DirFileMapping> destDirMapping() throws Exception {
+            Config config = null;
+            if (configPath == null) {
+                config = new Config();
+            } else {
+                config = new Config(configPath.toFile().getAbsolutePath());
+            }
+
+            Set<Map.Entry<Object, Object>> entries = config.get().entrySet();
+            List<DirFileMapping> mappings = new ArrayList<>(entries.size());
+            for (Map.Entry<Object, Object> entry : entries) {
+                var mapping = new DirFileMapping(getBaseDir(entry.getKey().toString()), List.of(entry.getValue().toString().split(",")));
+                mappings.add(mapping);
+            }
+            return mappings;
         }
-        return mappings;
-    }
 
 
-    private Path getBaseDir(String ext) {
-        if (desDir == null) {
-            return Path.of(ext + File.separator);
+        private Path getBaseDir(String ext) {
+            if (desDir == null) {
+                return Path.of(ext + File.separator);
+            }
+            String base = desDir.toFile().getAbsolutePath() + File.separator;
+            return Path.of(base + ext + File.separator);
         }
-        String base = desDir.toFile().getAbsolutePath() + File.separator;
-        return Path.of(base + ext + File.separator);
+
+        @Override
+        public void fileCreated(Path path) {
+            File file = path.toFile();
+            String ext = getExt(file.getName());
+            Optional<DirFileMapping> mapping = dirFileMappings.stream().filter(e -> e.checkExt(ext)).findFirst();
+            mapping.ifPresentOrElse(m -> fMoverService.moveFile(path, m.dir()), () -> Logger.log(() -> "No mapping found, ignoring : " + file.getName()));
+        }
+
+        record DirFileMapping(Path dir, List<String> ext) {
+
+            public boolean checkExt(String actualExt) {
+                return ext.stream().anyMatch(e -> e.equalsIgnoreCase(actualExt));
+            }
+        }
     }
 }

@@ -131,7 +131,7 @@ public class WatchDir {
         }
     }
 
-    interface WatchDirListener {
+    public interface WatchDirListener {
         void fileCreated(Path file);
     }
 }
