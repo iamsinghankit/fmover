@@ -1,7 +1,14 @@
 package org.github.fmover.service;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +36,7 @@ public class WatchDir {
         this.listener = listener;
 
         if (recursive) {
-            Logger.log(()->"Scanning %s ...".formatted(dir));
+            Logger.log(() -> "Scanning %s ...".formatted(dir));
             registerAll(dir);
         } else {
             register(dir);
@@ -48,10 +55,10 @@ public class WatchDir {
         WatchKey key = dir.register(watcher, ENTRY_CREATE);
         Path prev = keys.get(key);
         if (prev == null) {
-            Logger.log(()->"register %s ...".formatted(dir));
+            Logger.log(() -> "register %s ...".formatted(dir));
         } else {
             if (!dir.equals(prev)) {
-                Logger.log(()->"update: %s ...".formatted(dir));
+                Logger.log(() -> "update: %s ...".formatted(dir));
             }
         }
         keys.put(key, dir);

@@ -8,6 +8,8 @@ import java.util.function.Supplier;
 public class Logger {
 
     private static boolean debug = false;
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_RESET = "\u001B[0m";
 
     public static void setDebug(boolean debugFlag) {
         debug = debugFlag;

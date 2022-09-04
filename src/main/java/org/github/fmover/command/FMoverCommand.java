@@ -1,4 +1,4 @@
-package org.github.fmover;
+package org.github.fmover.command;
 
 import picocli.CommandLine.Command;
 

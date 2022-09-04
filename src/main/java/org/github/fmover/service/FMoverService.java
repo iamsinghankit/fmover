@@ -1,6 +1,5 @@
 package org.github.fmover.service;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 /**
@@ -8,9 +7,7 @@ import java.nio.file.Path;
  */
 public interface FMoverService {
 
-    void moveFile(Path file, Path desDir);
-
-     static String getExt(String fileName) {
+    static String getExt(String fileName) {
         String ext = "";
         int index = fileName.lastIndexOf('.');
         if (index > 0) {
@@ -27,6 +24,8 @@ public interface FMoverService {
             return filename.substring(0, index);
         }
     }
+
+    void moveFile(Path file, Path desDir);
 
     enum CopyOption {
         REPLACE, RENAME, FAIL
