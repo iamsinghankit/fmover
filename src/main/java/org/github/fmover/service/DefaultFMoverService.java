@@ -12,10 +12,10 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
  */
 public class DefaultFMoverService implements FMoverService {
 
-    private final CopyOption copyOption;
+    private final MoveOption moveOption;
 
-    public DefaultFMoverService(CopyOption copyOption) {
-        this.copyOption = copyOption;
+    public DefaultFMoverService(MoveOption moveOption) {
+        this.moveOption = moveOption;
     }
 
 
@@ -26,7 +26,7 @@ public class DefaultFMoverService implements FMoverService {
                 Files.createDirectories(dir);
             }
             Logger.log(() -> "Moving file %s to %s ".formatted(originalFile, dir));
-            switch (copyOption) {
+            switch (moveOption) {
                 case REPLACE -> Files.move(originalFile, dir.resolve(originalFile.getFileName()), REPLACE_EXISTING);
                 case RENAME -> {
                     String name = originalFile.toFile().getName();

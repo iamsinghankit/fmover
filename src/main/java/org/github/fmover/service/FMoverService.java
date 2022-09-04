@@ -27,7 +27,7 @@ public interface FMoverService {
 
     void moveFile(Path file, Path desDir);
 
-    enum CopyOption {
+    enum MoveOption {
         REPLACE, RENAME, FAIL
     }
 }

@@ -17,7 +17,8 @@ import java.nio.file.Path;
  */
 @Command(name = "poll",
          mixinStandardHelpOptions = true,
-         description = "File mover poll automatically copies files from source to destination by polling for changes.")
+         description = "File mover poll automatically copies files from source to destination by polling for changes.",
+         version = "fmover v1.0")
 public class FMoverPollerCommand extends AbstractFMoverCommand {
 
 
@@ -35,11 +36,11 @@ public class FMoverPollerCommand extends AbstractFMoverCommand {
             paramLabel = "<dest-base-dir>")
     private Path baseDir;
 
-    @Option(names = {"--co", "--copy-option"},
+    @Option(names = {"-m", "--move-option"},
             description = "Action to take if conflict occurs while moving files - possible values: REPLACE,RENAME,FAIL",
             defaultValue = "RENAME",
             showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
-    private FMoverService.CopyOption copyOption;
+    private FMoverService.MoveOption moveOption;
 
     @Option(names = {"-d", "--debug"},
             description = "To print out debug statement.",
@@ -57,6 +58,6 @@ public class FMoverPollerCommand extends AbstractFMoverCommand {
 
     private WatchDir.WatchDirListener listener() throws Exception {
         var config = new Config<Path, String>(configPath, COMMENTS, defaultEntry());
-        return (file) -> move(file, new DefaultFMoverService(copyOption), config.getMapping(keyMapper(baseDir)));
+        return (file) -> move(file, new DefaultFMoverService(moveOption), config.getMapping(pathMapper(baseDir)));
     }
 }

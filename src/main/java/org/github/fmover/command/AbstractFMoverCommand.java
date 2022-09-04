@@ -50,7 +50,7 @@ abstract class AbstractFMoverCommand implements Callable<Integer> {
         return path;
     }
 
-    protected Function<String, Path> keyMapper(Path baseDir) {
+    protected Function<String, Path> pathMapper(Path baseDir) {
         return (dir) -> {
             if (baseDir == null) {
                 return Path.of(dir + File.separator);
