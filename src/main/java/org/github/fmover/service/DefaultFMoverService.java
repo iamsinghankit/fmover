@@ -1,9 +1,9 @@
 package org.github.fmover.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
@@ -28,15 +28,27 @@ public class DefaultFMoverService implements FMoverService {
             Logger.log(() -> "Moving file %s to %s ".formatted(originalFile, dir));
             switch (moveOption) {
                 case REPLACE -> Files.move(originalFile, dir.resolve(originalFile.getFileName()), REPLACE_EXISTING);
-                case RENAME -> {
-                    String name = originalFile.toFile().getName();
-                    String newName = FMoverService.removeExt(name) + Instant.now().toEpochMilli() + "." + FMoverService.getExt(name);
-                    Files.move(originalFile, dir.resolve(originalFile.getFileName().resolveSibling(newName)));
-                }
+                case RENAME -> Files.move(originalFile, dir.resolve(getRenamePath(originalFile, dir).getFileName()));
                 case FAIL -> Files.move(originalFile, dir.resolve(originalFile.getFileName()));
             }
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    private Path getRenamePath(Path originalFile, Path dir) {
+        String fullPath = originalFile.getParent().toString() + File.separator;
+        String name = originalFile.toFile().getName();
+        Path targetFile = originalFile;
+        for (int i = 1; i < Integer.MAX_VALUE; i++) {
+            if (Files.exists(dir.resolve(targetFile.getFileName()))) {
+                name = name.replace("_copy_" + (i - 1), "");
+                name = FMoverService.removeExt(name) + "_copy_" + i + "." + FMoverService.getExt(name);
+                targetFile = Path.of(fullPath + name);
+            } else {
+                break;
+            }
+        }
+        return targetFile;
     }
 }
