@@ -9,7 +9,7 @@ import picocli.CommandLine.Command;
          mixinStandardHelpOptions = true,
          subcommands = {FMoverEventCommand.class, FMoverPollerCommand.class},
          description = "File mover automatically copies files from source to destination whenever new file is created.",
-         version = "fmover v1.0")
+         version = "fmover v2.0")
 public class FMoverCommand  {
 
 }
